@@ -1,34 +1,26 @@
-import mongoose, { Document, Schema, model, Types } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-// --- Subdocumentos para Estrutura ---
-
-// Interface genérica para qualquer tipo de escolha que o jogador possa fazer.
-// Reutilizável para proficiências, idiomas, equipamentos, traços, etc.
 interface IChoice {
   desc?: string;
   choose: number;
   type: string;
-  from: any; // A estrutura 'from' é muito aninhada e variável, 'any' é prático aqui
+  from: any;
 }
 
-// Interface para um item de equipamento inicial
 interface IStartingEquipment {
-  equipment: Types.ObjectId; // Ref para um futuro modelo 'Equipment'
+  equipment: string;
   quantity: number;
 }
 
-// Interface para a Característica (Feature) do Antecedente
 interface IBackgroundFeature {
   name: string;
   desc: string[];
 }
 
-// --- Interface Principal do Background ---
-
 export interface IBackground extends Document {
   index: string;
   name: string;
-  starting_proficiencies: Types.ObjectId[]; // Ref para 'Proficiency'
+  starting_proficiencies: string[];
   language_options: IChoice;
   starting_equipment: IStartingEquipment[];
   starting_equipment_options: IChoice[];
@@ -39,8 +31,6 @@ export interface IBackground extends Document {
   flaws: IChoice;
 }
 
-// --- Schemas do Mongoose ---
-
 const ChoiceSchema = new Schema<IChoice>({
   desc: { type: String },
   choose: { type: Number, required: true },
@@ -49,7 +39,7 @@ const ChoiceSchema = new Schema<IChoice>({
 }, { _id: false });
 
 const StartingEquipmentSchema = new Schema<IStartingEquipment>({
-  equipment: { type: Schema.Types.ObjectId, ref: 'Equipment', required: true },
+  equipment: { type: String, required: true },
   quantity: { type: Number, required: true },
 }, { _id: false });
 
@@ -58,10 +48,10 @@ const BackgroundFeatureSchema = new Schema<IBackgroundFeature>({
   desc: { type: [String], required: true },
 }, { _id: false });
 
-const BackgroundSchema = new Schema<IBackground>({
-  index: { type: String, required: true, unique: true },
+export const BackgroundSchema = new Schema<IBackground>({
+  index: { type: String, required: true },
   name: { type: String, required: true },
-  starting_proficiencies: [{ type: Schema.Types.ObjectId, ref: 'Proficiency' }],
+  starting_proficiencies: [String],
   language_options: { type: ChoiceSchema, required: true },
   starting_equipment: [StartingEquipmentSchema],
   starting_equipment_options: [ChoiceSchema],
@@ -71,7 +61,3 @@ const BackgroundSchema = new Schema<IBackground>({
   bonds: { type: ChoiceSchema, required: true },
   flaws: { type: ChoiceSchema, required: true },
 });
-
-const BackgroundModel = model<IBackground>('Background', BackgroundSchema);
-
-export default BackgroundModel;

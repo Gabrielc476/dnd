@@ -1,6 +1,7 @@
-import mongoose, { Document, Schema, model, Types } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+import { SubclassSchema, ISubclass } from './SubclassModel'; // <-- UTILIZADO AQUI
+import { ClassLevelSchema, IClassLevel } from './ClassLevelModel'; // <-- UTILIZADO AQUI
 
-// Interface para opções de escolha (proficiências, equipamentos)
 interface IChoice {
   desc: string;
   choose: number;
@@ -13,12 +14,11 @@ export interface IClass extends Document {
   name: string;
   hit_die: number;
   proficiency_choices: IChoice[];
-  proficiencies: Types.ObjectId[];
-  saving_throws: Types.ObjectId[];
-  starting_equipment: any[];
+  proficiencies: string[];
+  saving_throws: string[];
   starting_equipment_options: IChoice[];
-  subclasses: Types.ObjectId[];
-  levels: Types.ObjectId[];
+  class_levels: IClassLevel[];
+  subclasses: ISubclass[];
 }
 
 const ChoiceSchema = new Schema({
@@ -28,20 +28,15 @@ const ChoiceSchema = new Schema({
     from: { type: Schema.Types.Mixed },
 }, { _id: false });
 
-const ClassSchema = new Schema<IClass>({
+// Exporta a "planta" de uma Classe
+export const ClassSchema = new Schema<IClass>({
   index: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   hit_die: { type: Number, required: true },
   proficiency_choices: [ChoiceSchema],
-  proficiencies: [{ type: Schema.Types.ObjectId, ref: 'Proficiency' }],
-  saving_throws: [{ type: Schema.Types.ObjectId, ref: 'AbilityScore' }],
-  // A CORREÇÃO ESTÁ AQUI: A definição de array é feita com colchetes.
-  starting_equipment: [Schema.Types.Mixed],
+  proficiencies: [String],
+  saving_throws: [String],
   starting_equipment_options: [ChoiceSchema],
-  subclasses: [{ type: Schema.Types.ObjectId, ref: 'Subclass' }],
-  levels: [{ type: Schema.Types.ObjectId, ref: 'ClassLevel' }],
+  class_levels: [ClassLevelSchema], // <-- ClassLevelSchema é usado aqui
+  subclasses: [SubclassSchema],     // <-- SubclassSchema é usado aqui
 });
-
-const ClassModel = model<IClass>('Class', ClassSchema);
-
-export default ClassModel;

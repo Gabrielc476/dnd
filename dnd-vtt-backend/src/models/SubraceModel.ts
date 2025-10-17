@@ -1,42 +1,28 @@
-import mongoose, { Document, Schema, model, Types } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+import { FeatureSchema, IFeature } from './FeatureModel'; // <-- UTILIZADO AQUI
 
-// Reutilizando as interfaces do modelo de Raça para consistência
 interface IAbilityBonus {
-  ability_score: Types.ObjectId;
+  ability_score: string;
   bonus: number;
 }
 
-// Interface principal para a Sub-raça
 export interface ISubrace extends Document {
   index: string;
   name: string;
-  race: Types.ObjectId; // Referência à raça pai
   desc: string;
   ability_bonuses: IAbilityBonus[];
-  starting_proficiencies: Types.ObjectId[];
-  languages: Types.ObjectId[];
-  racial_traits: Types.ObjectId[];
+  racial_traits: IFeature[];
 }
 
-// --- Schemas do Mongoose ---
-
 const AbilityBonusSchema = new Schema<IAbilityBonus>({
-  ability_score: { type: Schema.Types.ObjectId, ref: 'AbilityScore', required: true },
+  ability_score: { type: String, required: true },
   bonus: { type: Number, required: true },
 }, { _id: false });
 
-
-const SubraceSchema = new Schema<ISubrace>({
-  index: { type: String, required: true, unique: true },
+export const SubraceSchema = new Schema<ISubrace>({
+  index: { type: String, required: true },
   name: { type: String, required: true },
-  race: { type: Schema.Types.ObjectId, ref: 'Race', required: true },
   desc: { type: String, required: true },
   ability_bonuses: [AbilityBonusSchema],
-  starting_proficiencies: [{ type: Schema.Types.ObjectId, ref: 'Proficiency' }],
-  languages: [{ type: Schema.Types.ObjectId, ref: 'Language' }],
-  racial_traits: [{ type: Schema.Types.ObjectId, ref: 'Trait' }],
-});
-
-const SubraceModel = model<ISubrace>('Subrace', SubraceSchema);
-
-export default SubraceModel;
+  racial_traits: [FeatureSchema], // <-- FeatureSchema é usado aqui
+}, { _id: false });

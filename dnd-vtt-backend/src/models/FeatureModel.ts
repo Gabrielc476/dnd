@@ -1,21 +1,17 @@
-import mongoose, { Document, Schema, model, Types } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
+// Interface
 export interface IFeature extends Document {
-  index: string; // Ex: "extra-attack-3"
-  name: string;  // Ex: "Extra Attack (3)"
-  level: number;
-  class: Types.ObjectId; // Referência ao modelo 'Class'
+  index: string;
+  name: string;
+  level: number; // Nível em que a característica foi adquirida
   desc: string[];
 }
 
-const FeatureSchema = new Schema<IFeature>({
-  index: { type: String, required: true, unique: true },
+// Schema (Planta)
+export const FeatureSchema = new Schema<IFeature>({
+  index: { type: String, required: true },
   name: { type: String, required: true },
   level: { type: Number, required: true },
-  class: { type: Schema.Types.ObjectId, ref: 'Class', required: true },
   desc: { type: [String], required: true },
-});
-
-const FeatureModel = model<IFeature>('Feature', FeatureSchema);
-
-export default FeatureModel;
+}, { _id: false }); // _id: false é importante para subdocumentos

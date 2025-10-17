@@ -1,20 +1,19 @@
-import mongoose, { Document, Schema, model, Types } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
+import { SubraceSchema, ISubrace } from './SubraceMOdel'; // <-- UTILIZADO AQUI
+import { FeatureSchema, IFeature } from './FeatureModel'; // <-- UTILIZADO AQUI
 
-// Interface para bônus de habilidade
 interface IAbilityBonus {
-  ability_score: Types.ObjectId; // Ref para um futuro modelo 'AbilityScore'
+  ability_score: string;
   bonus: number;
 }
 
-// Interface para opções de escolha (proficiências, idiomas, etc.)
 interface IChoice {
   desc: string;
   choose: number;
   type: string;
-  from: any; // A estrutura 'from' é muito aninhada e variável
+  from: any;
 }
 
-// Interface principal para a Raça
 export interface IRace extends Document {
   index: string;
   name: string;
@@ -24,18 +23,16 @@ export interface IRace extends Document {
   age: string;
   size: string;
   size_description: string;
-  starting_proficiencies: Types.ObjectId[]; // Ref para um futuro modelo 'Proficiency'
+  starting_proficiencies: string[];
   starting_proficiency_options?: IChoice;
-  languages: Types.ObjectId[]; // Ref para um futuro modelo 'Language'
+  languages: string[];
   language_desc: string;
-  traits: Types.ObjectId[]; // Ref para um futuro modelo 'Trait'
-  subraces: Types.ObjectId[]; // Ref para o modelo 'Subrace'
+  traits: IFeature[];
+  subraces: ISubrace[];
 }
 
-// --- Schemas do Mongoose ---
-
 const AbilityBonusSchema = new Schema<IAbilityBonus>({
-  ability_score: { type: Schema.Types.ObjectId, ref: 'AbilityScore', required: true },
+  ability_score: { type: String, required: true },
   bonus: { type: Number, required: true },
 }, { _id: false });
 
@@ -46,8 +43,8 @@ const ChoiceSchema = new Schema<IChoice>({
     from: { type: Schema.Types.Mixed },
 }, { _id: false });
 
-const RaceSchema = new Schema<IRace>({
-  index: { type: String, required: true, unique: true },
+export const RaceSchema = new Schema<IRace>({
+  index: { type: String, required: true },
   name: { type: String, required: true },
   speed: { type: Number, required: true },
   ability_bonuses: [AbilityBonusSchema],
@@ -55,14 +52,10 @@ const RaceSchema = new Schema<IRace>({
   age: { type: String, required: true },
   size: { type: String, required: true },
   size_description: { type: String, required: true },
-  starting_proficiencies: [{ type: Schema.Types.ObjectId, ref: 'Proficiency' }],
+  starting_proficiencies: [String],
   starting_proficiency_options: ChoiceSchema,
-  languages: [{ type: Schema.Types.ObjectId, ref: 'Language' }],
+  languages: [String],
   language_desc: { type: String },
-  traits: [{ type: Schema.Types.ObjectId, ref: 'Trait' }],
-  subraces: [{ type: Schema.Types.ObjectId, ref: 'Subrace' }],
+  traits: [FeatureSchema],     // <-- FeatureSchema é usado aqui
+  subraces: [SubraceSchema], // <-- SubraceSchema é usado aqui
 });
-
-const RaceModel = model<IRace>('Race', RaceSchema);
-
-export default RaceModel;
